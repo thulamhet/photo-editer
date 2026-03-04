@@ -1,86 +1,148 @@
-//
-//  ContentView.swift
-//  Photo Editer
-//
-//  Created by Nguyễn Công Thư on 25/2/26.
-//
-
 import SwiftUI
-import CoreData
+import PhotosUI
+import CoreImage
+import CoreImage.CIFilterBuiltins
+import Combine
+
+@MainActor
+final class EditorViewModel: ObservableObject {
+    
+    @Published var inputImage: UIImage?
+    @Published var outputImage: UIImage?
+    @Published var brightness: Double = 0
+    @Published var contrast: Double = 1
+    @Published var saturation: Double = 1
+    
+    private let filterTrigger = PassthroughSubject<Void, Never>()
+    private var cancellables = Set<AnyCancellable>()
+    
+    private let context = CIContext()
+    private let queue = DispatchQueue(label: "image.processing.queue", qos: .userInitiated)
+    
+    init() {
+        filterTrigger
+            .debounce(for: .milliseconds(50), scheduler: RunLoop.main)
+            .sink { [weak self] in
+                self?.applyFilters()
+            }
+            .store(in: &cancellables)
+    }
+    
+    func scheduleApplyFilters() {
+        filterTrigger.send(())
+    }
+    
+    func applyFilters() {
+        guard let inputImage,
+              let ciImage = CIImage(image: inputImage) else { return }
+        
+        let brightnessFilter = CIFilter.colorControls()
+        brightnessFilter.inputImage = ciImage
+        brightnessFilter.brightness = Float(brightness)
+        brightnessFilter.contrast = Float(contrast)
+        brightnessFilter.saturation = Float(saturation)
+        
+        guard let outputCIImage = brightnessFilter.outputImage else { return }
+        
+        queue.async {
+            if let cgImage = self.context.createCGImage(outputCIImage, from: outputCIImage.extent) {
+                let uiImage = UIImage(cgImage: cgImage)
+                
+                DispatchQueue.main.async {
+                    self.outputImage = uiImage
+                }
+            }
+        }
+    }
+    
+    func reset() {
+        brightness = 0
+        contrast = 1
+        saturation = 1
+        applyFilters()
+    }
+}
 
 struct ContentView: View {
-    @Environment(\.managedObjectContext) private var viewContext
-
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
-        animation: .default)
-    private var items: FetchedResults<Item>
-
+    
+    @StateObject private var viewModel = EditorViewModel()
+    @State private var selectedItem: PhotosPickerItem?
+    
     var body: some View {
-        NavigationView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-                    } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
-                    }
-                }
-                .onDelete(perform: deleteItems)
+        VStack {
+            if let image = viewModel.outputImage ?? viewModel.inputImage {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxHeight: 300)
+                    .cornerRadius(12)
+                    .padding()
+            } else {
+                Rectangle()
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(height: 300)
+                    .overlay(Text("Select Photo"))
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+            
+            PhotosPicker("Pick Image", selection: $selectedItem, matching: .images)
+                .onChange(of: selectedItem) { _, _ in
+                    loadImage()
                 }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
+                .padding()
+            
+            Group {
+                SliderView(title: "Brightness",
+                           value: $viewModel.brightness,
+                           range: -1...1) {
+                    viewModel.scheduleApplyFilters()
+                }
+                
+                SliderView(title: "Contrast",
+                           value: $viewModel.contrast,
+                           range: 0...4) {
+                    viewModel.scheduleApplyFilters()
+                }
+                
+                SliderView(title: "Saturation",
+                           value: $viewModel.saturation,
+                           range: 0...4) {
+                    viewModel.scheduleApplyFilters()
                 }
             }
-            Text("Select an item")
+            .padding(.horizontal)
+            
+            Button("Reset") {
+                viewModel.reset()
+            }
+            .padding()
         }
     }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
+    
+    private func loadImage() {
+        Task {
+            guard let data = try? await selectedItem?.loadTransferable(type: Data.self),
+                  let uiImage = UIImage(data: data) else { return }
+            
+            viewModel.inputImage = uiImage
+            viewModel.outputImage = uiImage
+            viewModel.applyFilters()
         }
     }
 }
 
-private let itemFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .medium
-    return formatter
-}()
-
-#Preview {
-    ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+struct SliderView: View {
+    let title: String
+    @Binding var value: Double
+    let range: ClosedRange<Double>
+    let onChange: () -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("\(title): \(value, specifier: "%.2f")")
+            Slider(value: $value, in: range)
+                .onChange(of: value) {
+                    onChange()
+                }
+        }
+    }
 }
