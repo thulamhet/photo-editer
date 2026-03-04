@@ -17,11 +17,11 @@ final class EditorViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     
     private let context = CIContext()
-    private let queue = DispatchQueue(label: "image.processing.queue", qos: .userInitiated)
+    private let queue = DispatchQueue(label: "image.processing.queue", qos: .userInteractive)
     
     init() {
         filterTrigger
-            .debounce(for: .milliseconds(50), scheduler: RunLoop.main)
+//            .debounce(for: .milliseconds(50), scheduler: RunLoop.main)
             .sink { [weak self] in
                 self?.applyFilters()
             }
