@@ -22,10 +22,11 @@ final class EditorViewModel: ObservableObject {
     
     private let context = CIContext()
     private let queue = DispatchQueue(label: "image.processing.queue", qos: .userInteractive)
+    private let brightnessFilter = CIFilter.colorControls()
     
     init() {
         filterTrigger
-//            .debounce(for: .milliseconds(50), scheduler: RunLoop.main)
+            .debounce(for: .milliseconds(50), scheduler: RunLoop.main)
             .sink { [weak self] in
                 self?.applyFilters()
             }
@@ -40,7 +41,6 @@ final class EditorViewModel: ObservableObject {
         guard let inputImage,
               let ciImage = CIImage(image: inputImage) else { return }
         
-        let brightnessFilter = CIFilter.colorControls()
         brightnessFilter.inputImage = ciImage
         brightnessFilter.brightness = Float(brightness)
         brightnessFilter.contrast = Float(contrast)
