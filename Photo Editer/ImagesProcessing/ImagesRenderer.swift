@@ -20,6 +20,7 @@ final class ImageRenderer {
     private var cachedFullCIImage: CIImage?
     private var cachedPreviewCIImage: CIImage?
     private var cachedImageIdentifier: ObjectIdentifier?
+    private let colorControlsFilter = CIFilter(name: "CIColorControls")!
     
     func prepareImages(from sourceImage: UIImage) {
         let identifier = ObjectIdentifier(sourceImage)
@@ -95,9 +96,8 @@ final class ImageRenderer {
         to image: CIImage,
         adjustments: ImageAdjustments
     ) -> UIImage? {
-        guard let filter = CIFilter(name: "CIColorControls") else {
-            return nil
-        }
+        let filter = colorControlsFilter
+        filter.setDefaults()
         
         filter.setValue(image, forKey: kCIInputImageKey)
         filter.setValue(adjustments.brightness, forKey: kCIInputBrightnessKey)
