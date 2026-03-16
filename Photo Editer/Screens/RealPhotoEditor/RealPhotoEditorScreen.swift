@@ -66,10 +66,6 @@ struct RealPhotoEditorScreen: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(photo.title)
-                        .font(.title2.weight(.bold))
-                        .foregroundStyle(.white)
-                    
                     Text("Edit a real image from your photo library")
                         .font(.subheadline)
                         .foregroundStyle(.white.opacity(0.7))
@@ -84,17 +80,19 @@ struct RealPhotoEditorScreen: View {
             }
             
             ZStack(alignment: .bottom) {
-                Image(uiImage: viewModel.previewImage)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 440)
-                    .background(.black.opacity(0.15))
-                    .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 30, style: .continuous)
-                            .stroke(.white.opacity(0.08), lineWidth: 1)
-                    )
+                if let image = viewModel.displayImage {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 440)
+                        .background(.black.opacity(0.15))
+                        .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 30, style: .continuous)
+                                .stroke(.white.opacity(0.08), lineWidth: 1)
+                        )
+                }
                 
                 HStack(spacing: 10) {
                     infoChip(title: "Bri", value: viewModel.brightness.formatted(.number.precision(.fractionLength(2))))
@@ -229,3 +227,7 @@ struct RealPhotoEditorScreen: View {
         showSaveAlert = true
     }
 }
+
+//#Preview {
+//    RealPhotoEditorScreen(photo: .init(title: "abc", imageData: Data()))
+//}

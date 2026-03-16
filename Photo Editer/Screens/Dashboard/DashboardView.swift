@@ -110,24 +110,6 @@ struct DashboardScreen: View {
                         .foregroundStyle(.white.opacity(0.95))
                 }
             }
-            
-            HStack(spacing: 12) {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(.white.opacity(0.55))
-                TextField("Search projects, presets...", text: $searchText)
-                    .textFieldStyle(.plain)
-                    .foregroundStyle(.white)
-            }
-            .padding(.horizontal, 16)
-            .frame(height: 52)
-            .background(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(.white.opacity(0.07))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(.white.opacity(0.06), lineWidth: 1)
-            )
         }
     }
     
@@ -302,19 +284,13 @@ struct DashboardScreen: View {
     }
 }
 
-// MARK: - Import Screen
-
-
-
-// MARK: - Editor Screen
-
 struct EditorScreen: View {
     let item: GalleryItem
     let namespace: Namespace.ID
     
-    @State private var brightness: Double = 0.05
-    @State private var contrast: Double = 1.05
-    @State private var saturation: Double = 1.0
+    @State private var brightness: Float = 0.05
+    @State private var contrast: Float = 1.05
+    @State private var saturation: Float = 1.0
     @State private var selectedPreset: String = "Original"
     
     private let presetNames = ["Original", "Cinematic", "Vintage", "Bright", "Moody"]
@@ -514,121 +490,6 @@ struct EditorScreen: View {
             saturation = 1.0
         }
     }
-}
-
-// MARK: - Shared Components
-
-
-struct PresetCard: View {
-    let item: PresetItem
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            ZStack(alignment: .topTrailing) {
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: [.blue, .purple, .pink],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 180, height: 140)
-                
-                Text("PRO")
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(.black.opacity(0.25))
-                    .clipShape(Capsule())
-                    .padding(12)
-            }
-            
-            Text(item.title)
-                .font(.headline.weight(.bold))
-                .foregroundStyle(.white)
-            Text(item.subtitle)
-                .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.65))
-        }
-        .frame(width: 180, alignment: .leading)
-    }
-}
-
-struct GalleryThumb: View {
-    let item: GalleryItem
-    
-    var body: some View {
-        RoundedRectangle(cornerRadius: 24, style: .continuous)
-            .fill(item.gradient)
-            .overlay(alignment: .bottomLeading) {
-                LinearGradient(colors: [.clear, .black.opacity(0.2), .black.opacity(0.45)], startPoint: .top, endPoint: .bottom)
-                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-            }
-            .overlay(alignment: .center) {
-                Image(systemName: item.icon)
-                    .font(.system(size: 38, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.96))
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-    }
-}
-
-struct EditorSliderRow: View {
-    let title: String
-    @Binding var value: Double
-    let range: ClosedRange<Double>
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text(title)
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                Spacer()
-                Text(value.formatted(.number.precision(.fractionLength(2))))
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.7))
-            }
-            Slider(value: $value, in: range)
-                .tint(.white)
-        }
-    }
-}
-
-// MARK: - Models
-
-struct GalleryItem: Hashable, Identifiable {
-    let id = UUID()
-    let title: String
-    let subtitle: String
-    let icon: String
-    let colors: [Color]
-    
-    var gradient: LinearGradient {
-        LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing)
-    }
-    
-    static let samples: [GalleryItem] = [
-        .init(title: "Neon Street", subtitle: "Edited 2h ago", icon: "sparkles.tv", colors: [.purple, .blue, .black]),
-        .init(title: "Golden Portrait", subtitle: "Edited yesterday", icon: "person.crop.square", colors: [.orange, .pink, .red]),
-        .init(title: "Ocean Air", subtitle: "Edited 3d ago", icon: "water.waves", colors: [.cyan, .blue, .indigo])
-    ]
-    
-    static let moreSamples: [GalleryItem] = [
-        .init(title: "Urban Noise", subtitle: "Tap to edit", icon: "building.2.crop.circle", colors: [.gray, .black, .indigo]),
-        .init(title: "Soft Bloom", subtitle: "Tap to edit", icon: "camera.macro", colors: [.pink, .purple, .mint]),
-        .init(title: "Night Drive", subtitle: "Tap to edit", icon: "car.fill", colors: [.orange, .purple, .black]),
-        .init(title: "Sunny Day", subtitle: "Tap to edit", icon: "sun.max.fill", colors: [.yellow, .orange, .pink]),
-        .init(title: "Forest Calm", subtitle: "Tap to edit", icon: "leaf.fill", colors: [.green, .teal, .indigo])
-    ]
-}
-
-struct PresetItem: Identifiable {
-    let id = UUID()
-    let title: String
-    let subtitle: String
 }
 
 #Preview {

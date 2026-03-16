@@ -32,7 +32,7 @@ struct DashboardToolCard: View {
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundStyle(.white)
                     }
-                    Spacer()
+//                    Spacer()
                     VStack(alignment: .leading, spacing: 4) {
                         Text(title)
                             .font(.headline.weight(.bold))
@@ -55,11 +55,10 @@ struct DashboardToolCard: View {
 }
 
 #Preview {
-    DashboardToolCard(
-        title: "ABC",
-        subtitle: "Example subtitle",
-        icon: "camera.fill",
-        colors: [.purple, .blue],
-        action: {}
-    )
+    LazyVGrid(columns: [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)], spacing: 14) {
+        DashboardToolCard(title: "New Edit", subtitle: "Start from gallery", icon: "plus.square.fill", colors: [.purple, .blue]) {}
+        DashboardToolCard(title: "Camera", subtitle: "Shoot & edit instantly", icon: "camera.fill", colors: [.orange, .pink]) {}
+        DashboardToolCard(title: "Batch Edit", subtitle: "Apply to many", icon: "square.stack.3d.up.fill", colors: [.green, .teal]) {}
+        DashboardToolCard(title: "Templates", subtitle: "Social-ready layout", icon: "rectangle.on.rectangle.angled.fill", colors: [.indigo, .cyan]) {}
+    }
 }

@@ -18,7 +18,7 @@ final class ImageRenderer {
     
     func renderPreview(
         sourceImage: UIImage,
-        brightness: Float,
+        adjustments: ImageAdjustments,
         completion: @escaping (UIImage?) -> Void
     ) {
         previewTask?.cancel()
@@ -26,9 +26,9 @@ final class ImageRenderer {
         previewTask = Task(priority: .userInitiated) { [weak self] in
             guard let self else { return }
             
-            let result = self.applyBrightness(
+            let result = self.applyAdjustments(
                 to: sourceImage,
-                brightness: brightness
+                adjustments: adjustments
             )
             
             guard !Task.isCancelled else { return }
@@ -41,7 +41,7 @@ final class ImageRenderer {
     
     func renderFullQuality(
         sourceImage: UIImage,
-        brightness: Float,
+        adjustments: ImageAdjustments,
         completion: @escaping (UIImage?) -> Void
     ) {
         fullTask?.cancel()
@@ -49,9 +49,9 @@ final class ImageRenderer {
         fullTask = Task(priority: .userInitiated) { [weak self] in
             guard let self else { return }
             
-            let result = self.applyBrightness(
+            let result = self.applyAdjustments(
                 to: sourceImage,
-                brightness: brightness
+                adjustments: adjustments
             )
             
             guard !Task.isCancelled else { return }
@@ -62,9 +62,9 @@ final class ImageRenderer {
         }
     }
     
-    private func applyBrightness(
+    private func applyAdjustments(
         to image: UIImage,
-        brightness: Float
+        adjustments: ImageAdjustments
     ) -> UIImage? {
         
         guard let ciImage = CIImage(image: image),
@@ -73,8 +73,10 @@ final class ImageRenderer {
         }
 
         filter.setValue(ciImage, forKey: kCIInputImageKey)
-        filter.setValue(brightness, forKey: kCIInputBrightnessKey)
-
+        filter.setValue(adjustments.brightness, forKey: kCIInputBrightnessKey)
+        filter.setValue(adjustments.contrast, forKey: kCIInputContrastKey)
+        filter.setValue(adjustments.saturation, forKey: kCIInputSaturationKey)
+        
         guard let output = filter.outputImage,
               let cgImage = context.createCGImage(output, from: output.extent) else {
             return nil

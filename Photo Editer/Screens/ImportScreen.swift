@@ -103,65 +103,51 @@ struct ImportScreen: View {
     }
     
     private var importCTA: some View {
-        RoundedRectangle(cornerRadius: 28, style: .continuous)
-            .fill(.white.opacity(0.07))
-            .frame(height: 150)
-            .overlay(
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .stroke(.white.opacity(0.06), lineWidth: 1)
-            )
-            .overlay {
-                HStack(spacing: 16) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .fill(
-                                LinearGradient(
-                                    colors: [.purple, .blue],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
+        PhotosPicker(
+            selection: $selectedPhotoItem,
+            matching: .images,
+            photoLibrary: .shared()
+        ) {
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .fill(.white.opacity(0.07))
+                .frame(height: 150)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 28, style: .continuous)
+                        .stroke(.white.opacity(0.06), lineWidth: 1)
+                )
+                .overlay {
+                    HStack(spacing: 16) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [.purple, .blue],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
                                 )
-                            )
-                            .frame(width: 74, height: 74)
+                                .frame(width: 74, height: 74)
+                            
+                            Image(systemName: isLoadingPhoto ? "hourglass" : "photo.stack.fill")
+                                .font(.system(size: 30, weight: .bold))
+                                .foregroundStyle(.white)
+                        }
                         
-                        Image(systemName: isLoadingPhoto ? "hourglass" : "photo.stack.fill")
-                            .font(.system(size: 30, weight: .bold))
-                            .foregroundStyle(.white)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Import from Library")
-                            .font(.title3.weight(.bold))
-                            .foregroundStyle(.white)
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Import from Library")
+                                .font(.title3.weight(.bold))
+                                .foregroundStyle(.white)
+                            
+                            Text("Choose a real image from Photos.")
+                                .font(.subheadline)
+                                .foregroundStyle(.white.opacity(0.72))
+                        }
                         
-                        Text("Choose a real image from Photos.")
-                            .font(.subheadline)
-                            .foregroundStyle(.white.opacity(0.72))
+                        Spacer()
                     }
-                    
-                    Spacer()
+                    .padding(20)
                 }
-                .padding(20)
-            }
-            .overlay(alignment: .bottomTrailing) {
-                PhotosPicker(
-                    selection: $selectedPhotoItem,
-                    matching: .images,
-                    photoLibrary: .shared()
-                ) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "plus")
-                        Text(isLoadingPhoto ? "Loading..." : "Pick Photo")
-                            .fontWeight(.semibold)
-                    }
-                    .foregroundStyle(.black)
-                    .padding(.horizontal, 18)
-                    .frame(height: 44)
-                    .background(.white)
-                    .clipShape(Capsule())
-                }
-                .disabled(isLoadingPhoto)
-                .padding(18)
-            }
+        }
     }
     
     @MainActor

@@ -10,15 +10,16 @@ import Combine
 
 @MainActor
 final class RealPhotoEditorViewModel: ObservableObject {
-    @Published var brightness: Double = 0
-    @Published var contrast: Double = 1
-    @Published var saturation: Double = 1
+    @Published var brightness: Float = 0
+    @Published var contrast: Float = 1
+    @Published var saturation: Float = 1
     @Published var previewImage: UIImage
     @Published var isRendering = false
+    @Published var displayImage: UIImage?
     
     private let originalImage: UIImage
     private let context = CIContext()
-    private var renderTask: Task<Void, Never>?
+    private let renderer = ImageRenderer()
     
     init(image: UIImage) {
         self.originalImage = image
@@ -26,35 +27,19 @@ final class RealPhotoEditorViewModel: ObservableObject {
     }
     
     func scheduleRender() {
-        renderTask?.cancel()
         
-        let brightness = brightness
-        let contrast = contrast
-        let saturation = saturation
-        let originalImage = originalImage
-        let context = context
-        
-        isRendering = true
-        
-        renderTask = Task.detached(priority: .userInitiated) { [weak self] in
-            try? await Task.sleep(for: .milliseconds(60))
-            guard !Task.isCancelled else { return }
-            
-            let renderedImage = Self.render(
-                image: originalImage,
-                brightness: brightness,
-                contrast: contrast,
-                saturation: saturation,
-                context: context
-            ) ?? originalImage
-            
-            guard !Task.isCancelled else { return }
-            
-            await MainActor.run {
-                self?.previewImage = renderedImage
-                self?.isRendering = false
-            }
+        renderer.renderPreview(sourceImage: previewImage, adjustments: .init(brightness: brightness, contrast: contrast, saturation: saturation, hue: 0)) { [weak self] image in
+            self?.displayImage = image
         }
+    }
+    
+    func sliderEditingChanged(isEditing: Bool) {
+        guard !isEditing else { return }
+        
+        renderer.renderPreview(sourceImage: originalImage, adjustments: .init(brightness: brightness, contrast: contrast, saturation: saturation, hue: 0)) { [weak self] image in
+            self?.displayImage = image
+        }
+
     }
     
     func applyPreset(_ preset: String) {
@@ -93,31 +78,7 @@ final class RealPhotoEditorViewModel: ObservableObject {
         contrast = 1
         saturation = 1
         previewImage = originalImage
-        renderTask?.cancel()
         isRendering = false
-    }
-    
-    nonisolated private static func render(
-        image: UIImage,
-        brightness: Double,
-        contrast: Double,
-        saturation: Double,
-        context: CIContext
-    ) -> UIImage? {
-        guard let ciImage = CIImage(image: image) else { return nil }
-        
-        let filter = CIFilter.colorControls()
-        filter.inputImage = ciImage
-        filter.brightness = Float(brightness)
-        filter.contrast = Float(contrast)
-        filter.saturation = Float(saturation)
-        
-        guard let outputImage = filter.outputImage,
-              let cgImage = context.createCGImage(outputImage, from: outputImage.extent) else {
-            return nil
-        }
-        
-        return UIImage(cgImage: cgImage, scale: image.scale, orientation: .up)
     }
 }
 

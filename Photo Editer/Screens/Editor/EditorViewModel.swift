@@ -33,23 +33,23 @@ final class PhotoEditorViewModel: ObservableObject {
         
         guard let previewImage else { return }
         
-        renderer.renderPreview(
-            sourceImage: previewImage,
-            brightness: Float(newValue)
-        ) { [weak self] image in
-            self?.displayImage = image
-        }
+//        renderer.renderPreview(
+//            sourceImage: previewImage,
+//            brightness: Float(newValue)
+//        ) { [weak self] image in
+//            self?.displayImage = image
+//        }
     }
     
     func sliderEditingChanged(isEditing: Bool) {
         guard !isEditing else { return }
         guard let originalImage else { return }
         
-        renderer.renderFullQuality(
-            sourceImage: originalImage,
-            brightness: Float(brightness)
-        ) { [weak self] image in
-            self?.displayImage = image
-        }
+//        renderer.renderFullQuality(
+//            sourceImage: originalImage,
+//            brightness: Float(brightness)
+//        ) { [weak self] image in
+//            self?.displayImage = image
+//        }
     }
 }
