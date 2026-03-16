@@ -222,7 +222,7 @@ struct RealPhotoEditorScreen: View {
     }
     
     private func saveImage() {
-        UIImageWriteToSavedPhotosAlbum(viewModel.previewImage, nil, nil, nil)
+        UIImageWriteToSavedPhotosAlbum(viewModel.displayImage ?? .init(), nil, nil, nil)
         saveMessage = "Your edited image has been saved to Photos."
         showSaveAlert = true
     }

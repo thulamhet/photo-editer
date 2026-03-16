@@ -13,7 +13,6 @@ final class RealPhotoEditorViewModel: ObservableObject {
     @Published var brightness: Float = 0
     @Published var contrast: Float = 1
     @Published var saturation: Float = 1
-    @Published var previewImage: UIImage
     @Published var isRendering = false
     @Published var displayImage: UIImage?
     
@@ -23,12 +22,12 @@ final class RealPhotoEditorViewModel: ObservableObject {
     
     init(image: UIImage) {
         self.originalImage = image
-        self.previewImage = image
+        self.displayImage = image
     }
     
     func scheduleRender() {
         
-        renderer.renderPreview(sourceImage: previewImage, adjustments: .init(brightness: brightness, contrast: contrast, saturation: saturation, hue: 0)) { [weak self] image in
+        renderer.renderPreview(sourceImage: originalImage, adjustments: .init(brightness: brightness, contrast: contrast, saturation: saturation, hue: 0)) { [weak self] image in
             self?.displayImage = image
         }
     }
@@ -77,7 +76,7 @@ final class RealPhotoEditorViewModel: ObservableObject {
         brightness = 0
         contrast = 1
         saturation = 1
-        previewImage = originalImage
+        displayImage = originalImage
         isRendering = false
     }
 }

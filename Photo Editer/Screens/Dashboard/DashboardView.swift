@@ -26,8 +26,8 @@ struct PhotoEditorAppFlowView: View {
                         }
                 case .editor(let item):
                     EditorScreen(item: item, namespace: namespace)
-                    case .realEditor(let photo):
-                        RealPhotoEditorScreen(photo: photo)
+                case .realEditor(let photo):
+                    RealPhotoEditorScreen(photo: photo)
                 }
             }
         }
