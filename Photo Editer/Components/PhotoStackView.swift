@@ -137,10 +137,10 @@ struct PhotoStackView: View {
     }
 }
 
-#Preview {
-    PhotoStackView(
-        backLeftImage: "paint1",
-        backRightImage: "paint3",
-        frontImage: "paint4"
-    )
-}
+//#Preview {
+//    PhotoStackView(
+//        backLeftImage: "paint1",
+//        backRightImage: "paint3",
+//        frontImage: "paint4"
+//    )
+//}

@@ -36,6 +36,6 @@ struct AppBackground: View {
     }
 }
 
-#Preview {
-    AppBackground()
-}
+//#Preview {
+//    AppBackground()
+//}
