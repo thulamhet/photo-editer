@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreImage
 
 final class ImageRenderer {
     
@@ -16,18 +17,42 @@ final class ImageRenderer {
     private var previewTask: Task<Void, Never>?
     private var fullTask: Task<Void, Never>?
     
+    private var cachedFullCIImage: CIImage?
+    private var cachedPreviewCIImage: CIImage?
+    private var cachedImageIdentifier: ObjectIdentifier?
+    
+    func prepareImages(from sourceImage: UIImage) {
+        let identifier = ObjectIdentifier(sourceImage)
+        guard cachedImageIdentifier != identifier else { return }
+        cachedImageIdentifier = identifier
+        
+        guard let cg = sourceImage.cgImage else {
+            cachedFullCIImage = nil
+            cachedPreviewCIImage = nil
+            return
+        }
+        
+        let full = CIImage(cgImage: cg)
+        cachedFullCIImage = full
+        cachedPreviewCIImage = downscaledImage(from: full, maxDim: 1000)
+    }
+    
     func renderPreview(
         sourceImage: UIImage,
         adjustments: ImageAdjustments,
         completion: @escaping (UIImage?) -> Void
     ) {
+        prepareImages(from: sourceImage)
         previewTask?.cancel()
         
+        let inputImage = cachedPreviewCIImage
+        
         previewTask = Task(priority: .userInitiated) { [weak self] in
-            guard let self else { return }
+            guard let self, let inputImage else { return }
+            guard !Task.isCancelled else { return }
             
             let result = self.applyAdjustments(
-                to: sourceImage,
+                to: inputImage,
                 adjustments: adjustments
             )
             
@@ -44,13 +69,17 @@ final class ImageRenderer {
         adjustments: ImageAdjustments,
         completion: @escaping (UIImage?) -> Void
     ) {
+        prepareImages(from: sourceImage)
         fullTask?.cancel()
         
+        let inputImage = cachedFullCIImage
+        
         fullTask = Task(priority: .userInitiated) { [weak self] in
-            guard let self else { return }
+            guard let self, let inputImage else { return }
+            guard !Task.isCancelled else { return }
             
             let result = self.applyAdjustments(
-                to: sourceImage,
+                to: inputImage,
                 adjustments: adjustments
             )
             
@@ -63,16 +92,14 @@ final class ImageRenderer {
     }
     
     private func applyAdjustments(
-        to image: UIImage,
+        to image: CIImage,
         adjustments: ImageAdjustments
     ) -> UIImage? {
-        
-        guard let ciImage = CIImage(image: image),
-              let filter = CIFilter(name: "CIColorControls") else {
+        guard let filter = CIFilter(name: "CIColorControls") else {
             return nil
         }
-
-        filter.setValue(ciImage, forKey: kCIInputImageKey)
+        
+        filter.setValue(image, forKey: kCIInputImageKey)
         filter.setValue(adjustments.brightness, forKey: kCIInputBrightnessKey)
         filter.setValue(adjustments.contrast, forKey: kCIInputContrastKey)
         filter.setValue(adjustments.saturation, forKey: kCIInputSaturationKey)
@@ -81,8 +108,24 @@ final class ImageRenderer {
               let cgImage = context.createCGImage(output, from: output.extent) else {
             return nil
         }
-
+        
         return UIImage(cgImage: cgImage)
     }
+    
+    private func downscaledImage(from image: CIImage, maxDim: CGFloat) -> CIImage {
+        let w = image.extent.width
+        let h = image.extent.height
+        let scale = min(maxDim / max(w, h), 1.0)
+        
+        guard scale < 1.0,
+              let lanczos = CIFilter(name: "CILanczosScaleTransform") else {
+            return image
+        }
+        
+        lanczos.setValue(image, forKey: kCIInputImageKey)
+        lanczos.setValue(scale, forKey: kCIInputScaleKey)
+        lanczos.setValue(1.0, forKey: kCIInputAspectRatioKey)
+        
+        return lanczos.outputImage ?? image
+    }
 }
-
