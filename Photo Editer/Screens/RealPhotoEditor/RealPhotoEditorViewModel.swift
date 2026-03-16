@@ -19,6 +19,7 @@ final class RealPhotoEditorViewModel: ObservableObject {
     private let originalImage: UIImage
     private let context = CIContext()
     private let renderer = ImageRenderer()
+    private var cancellables = Set<AnyCancellable>()
     
     init(image: UIImage) {
         self.originalImage = image
@@ -81,3 +82,27 @@ final class RealPhotoEditorViewModel: ObservableObject {
     }
 }
 
+extension RealPhotoEditorViewModel {
+    private func bind() {
+        Publishers.CombineLatest3($brightness, $contrast, $saturation)
+                    .debounce(for: .milliseconds(50), scheduler: RunLoop.main)
+                    .sink { [weak self] brightness, contrast, saturation in
+                        guard let self else { return }
+                        
+                        let adjustments = ImageAdjustments(
+                            brightness: brightness,
+                            contrast: contrast,
+                            saturation: saturation,
+                            hue: 0
+                        )
+                        
+                        self.renderer.renderPreview(
+                            sourceImage: self.originalImage,
+                            adjustments: adjustments
+                        ) { [weak self] image in
+                            self?.displayImage = image
+                        }
+                    }
+                    .store(in: &cancellables)
+    }
+}
