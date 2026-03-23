@@ -9,7 +9,6 @@ import SwiftUI
 
 enum Route: Hashable {
     case importPhotos
-    case editor(GalleryItem)
     case realEditor(EditablePhoto)
 }
 
@@ -26,12 +25,10 @@ struct PhotoEditorAppFlowView: View {
                 switch route {
                 case .importPhotos:
                         ImportScreen(namespace: namespace) { selected in
-                            path.append(.editor(selected))
+                          
                         } onImportedPhoto: { photo in
                             path.append(.realEditor(photo))
                         }
-                case .editor(let item):
-                    EditorScreen(item: item, namespace: namespace)
                 case .realEditor(let photo):
                     RealPhotoEditorScreen(photo: photo)
                 }
