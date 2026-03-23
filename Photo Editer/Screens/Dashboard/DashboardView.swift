@@ -35,16 +35,6 @@ struct PhotoEditorAppFlowView: View {
     }
 }
 
-// MARK: - Routes
-struct EditablePhoto: Hashable {
-    let id = UUID()
-    let title: String
-    let imageData: Data
-    
-    var image: UIImage {
-        UIImage(data: imageData) ?? UIImage()
-    }
-}
 enum Route: Hashable {
     case importPhotos
     case editor(GalleryItem)
