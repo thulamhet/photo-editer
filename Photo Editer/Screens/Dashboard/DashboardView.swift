@@ -24,7 +24,7 @@ struct DashboardScreen: View {
     
     var body: some View {
         ZStack {
-            AppBackground()
+            backgroundLayer
             
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 24) {
@@ -43,29 +43,44 @@ struct DashboardScreen: View {
     }
     
     private var headerSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Welcome back")
+        VStack(alignment: .leading, spacing: 18) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("DARKROOM STUDIO")
+                        .font(.caption.weight(.semibold))
+                        .tracking(2)
+                        .foregroundStyle(VintagePalette.accent)
+
+                    Text("Craft your photos\nlike old film")
+                        .font(.system(size: 34, weight: .semibold, design: .serif))
+                        .foregroundStyle(VintagePalette.textPrimary)
+                        .multilineTextAlignment(.leading)
+
+                    Text("Soft tones, faded prints, and handcrafted edits.")
                         .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.68))
-                    
-                    Text("Edit like an artist")
-                        .font(.system(size: 30, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(VintagePalette.textSecondary)
                 }
-                
+
                 Spacer()
-                
+
                 ZStack {
                     Circle()
-                        .fill(.white.opacity(0.08))
-                        .frame(width: 48, height: 48)
-                    Image(systemName: "person.crop.circle.fill")
-                        .font(.system(size: 28))
-                        .foregroundStyle(.white.opacity(0.95))
+                        .fill(VintagePalette.cardSoft)
+                        .frame(width: 52, height: 52)
+
+                    Circle()
+                        .stroke(VintagePalette.stroke, lineWidth: 1)
+                        .frame(width: 52, height: 52)
+
+                    Image(systemName: "person.crop.circle")
+                        .font(.system(size: 24, weight: .medium))
+                        .foregroundStyle(VintagePalette.textPrimary.opacity(0.9))
                 }
             }
+
+            Rectangle()
+                .fill(VintagePalette.accent.opacity(0.35))
+                .frame(width: 96, height: 1)
         }
     }
     
@@ -74,72 +89,76 @@ struct DashboardScreen: View {
             onNavigate(.importPhotos)
         } label: {
             ZStack(alignment: .bottomLeading) {
-                RoundedRectangle(cornerRadius: 32, style: .continuous)
+                RoundedRectangle(cornerRadius: 30, style: .continuous)
                     .fill(
                         LinearGradient(
                             colors: [
-                                Color(red: 0.22, green: 0.15, blue: 0.42),
-                                Color(red: 0.08, green: 0.10, blue: 0.18),
-                                Color(red: 0.42, green: 0.16, blue: 0.20)
+                                VintagePalette.cardSoft,
+                                VintagePalette.olive,
+                                VintagePalette.wine
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
-                    .frame(height: 290)
-                    .overlay(alignment: .topTrailing) {
-                        ZStack {
-                            Circle()
-                                .fill(.white.opacity(0.08))
-                                .frame(width: 180, height: 180)
-                                .offset(x: 30, y: -20)
-                            Circle()
-                                .fill(.white.opacity(0.06))
-                                .frame(width: 110, height: 110)
-                                .offset(x: -10, y: 45)
-                        }
-                    }
+                    .frame(height: 300)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 32, style: .continuous)
-                            .stroke(.white.opacity(0.08), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 30, style: .continuous)
+                            .stroke(VintagePalette.stroke, lineWidth: 1)
                     )
-                
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("START NEW PROJECT")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.7))
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Turn your photos into something cinematic")
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
-                            .multilineTextAlignment(.leading)
-                        
-                        Text("Import from gallery, apply premium presets, and fine-tune brightness, contrast, and saturation.")
-                            .font(.subheadline)
-                            .foregroundStyle(.white.opacity(0.8))
+                    .overlay(alignment: .topTrailing) {
+                        VStack(alignment: .trailing, spacing: 8) {
+                            Text("EST. 2026")
+                                .font(.caption2.weight(.semibold))
+                                .tracking(1.5)
+                            Text("Fine Tone Lab")
+                                .font(.caption)
+                        }
+                        .foregroundStyle(VintagePalette.textSecondary.opacity(0.9))
+                        .padding(20)
                     }
-                    
+
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("NEW SESSION")
+                        .font(.caption.weight(.bold))
+                        .tracking(2)
+                        .foregroundStyle(VintagePalette.accent)
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Build a timeless\nphoto look")
+                            .font(.system(size: 30, weight: .semibold, design: .serif))
+                            .foregroundStyle(VintagePalette.textPrimary)
+
+                        Text("Import a frame, apply warm film-inspired presets, and tune every detail with a softer, analog feel.")
+                            .font(.subheadline)
+                            .foregroundStyle(VintagePalette.textSecondary)
+                            .lineSpacing(3)
+                    }
+
                     HStack(spacing: 12) {
-                        Label("New Edit", systemImage: "plus")
+                        Label("Start Edit", systemImage: "plus")
                             .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.black)
+                            .foregroundStyle(Color.black.opacity(0.75))
                             .padding(.horizontal, 18)
-                            .frame(height: 46)
-                            .background(.white)
+                            .frame(height: 44)
+                            .background(VintagePalette.accent)
                             .clipShape(Capsule())
-                        
-                        Label("AI Enhance", systemImage: "sparkles")
+
+                        Label("Film Looks", systemImage: "sparkles")
                             .font(.subheadline.weight(.medium))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(VintagePalette.textPrimary)
                             .padding(.horizontal, 18)
-                            .frame(height: 46)
-                            .background(.white.opacity(0.08))
-                            .clipShape(Capsule())
+                            .frame(height: 44)
+                            .background(VintagePalette.card.opacity(0.55))
+                            .overlay(
+                                Capsule()
+                                    .stroke(VintagePalette.stroke, lineWidth: 1)
+                            )
                     }
                 }
                 .padding(24)
             }
+            .shadow(color: .black.opacity(0.22), radius: 22, y: 12)
         }
         .buttonStyle(.plain)
     }
@@ -149,12 +168,12 @@ struct DashboardScreen: View {
             sectionTitle("Quick Tools")
             
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)], spacing: 14) {
-                DashboardToolCard(title: "New Edit", subtitle: "Start from gallery", icon: "plus.square.fill", colors: [.purple, .blue]) {
+                DashboardToolCard(title: "New Edit", subtitle: "Start from gallery", icon: "plus.square.fill", colors: [VintagePalette.accentSoft, VintagePalette.olive]) {
                     onNavigate(.importPhotos)
                 }
-                DashboardToolCard(title: "Camera", subtitle: "Shoot & edit instantly", icon: "camera.fill", colors: [.orange, .pink]) {}
-                DashboardToolCard(title: "Batch Edit", subtitle: "Apply to many", icon: "square.stack.3d.up.fill", colors: [.green, .teal]) {}
-                DashboardToolCard(title: "Templates", subtitle: "Social-ready layout", icon: "rectangle.on.rectangle.angled.fill", colors: [.indigo, .cyan]) {}
+                DashboardToolCard(title: "Camera", subtitle: "Shoot & edit instantly", icon: "camera.fill", colors: [VintagePalette.wine, VintagePalette.accentSoft]) {}
+                DashboardToolCard(title: "Batch Edit", subtitle: "Apply to many", icon: "square.stack.3d.up.fill", colors: [VintagePalette.olive, VintagePalette.cardSoft]) {}
+                DashboardToolCard(title: "Templates", subtitle: "Social-ready layout", icon: "rectangle.on.rectangle.angled.fill", colors: [Color(red: 0.34, green: 0.28, blue: 0.20), VintagePalette.wine]) {}
             }
         }
     }
@@ -182,31 +201,32 @@ struct DashboardScreen: View {
                             VStack(alignment: .leading, spacing: 6) {
                                 Text(item.title)
                                     .font(.headline)
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(VintagePalette.textPrimary)
+
                                 Text(item.subtitle)
                                     .font(.subheadline)
-                                    .foregroundStyle(.white.opacity(0.65))
+                                    .foregroundStyle(VintagePalette.textSecondary)
                             }
                             
                             Spacer()
                             
                             Image(systemName: "chevron.right")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundStyle(.white.opacity(0.7))
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundStyle(VintagePalette.textPrimary.opacity(0.8))
                                 .frame(width: 34, height: 34)
-                                .background(.white.opacity(0.07))
+                                .background(VintagePalette.cardSoft)
                                 .clipShape(Circle())
                         }
                         .padding(14)
                         .background(
                             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                .fill(.white.opacity(0.06))
+                                .fill(VintagePalette.card.opacity(0.92))
                         )
                         .overlay(
                             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                .stroke(.white.opacity(0.06), lineWidth: 1)
+                                .stroke(VintagePalette.stroke, lineWidth: 1)
                         )
-                    }
+                        .shadow(color: .black.opacity(0.16), radius: 14, y: 8)                    }
                     .buttonStyle(.plain)
                 }
             }
@@ -235,11 +255,63 @@ struct DashboardScreen: View {
     
     private func sectionTitle(_ text: String) -> some View {
         Text(text)
-            .font(.title3.weight(.bold))
-            .foregroundStyle(.white)
+            .font(.system(size: 24, weight: .semibold, design: .serif))
+            .foregroundStyle(VintagePalette.textPrimary)
     }
 }
 
 #Preview {
     PhotoEditorAppFlowView()
+}
+
+private enum VintagePalette {
+    static let backgroundTop = Color(red: 0.16, green: 0.13, blue: 0.10)
+    static let backgroundBottom = Color(red: 0.07, green: 0.08, blue: 0.06)
+
+    static let card = Color(red: 0.21, green: 0.18, blue: 0.14)
+    static let cardSoft = Color(red: 0.27, green: 0.23, blue: 0.18)
+
+    static let accent = Color(red: 0.71, green: 0.58, blue: 0.36)      // gold muted
+    static let accentSoft = Color(red: 0.51, green: 0.36, blue: 0.25)  // bronze
+    static let wine = Color(red: 0.38, green: 0.20, blue: 0.20)
+    static let olive = Color(red: 0.29, green: 0.31, blue: 0.22)
+
+    static let textPrimary = Color(red: 0.96, green: 0.92, blue: 0.84)
+    static let textSecondary = Color(red: 0.77, green: 0.72, blue: 0.64)
+    static let stroke = Color.white.opacity(0.08)
+}
+
+private var backgroundLayer: some View {
+    ZStack {
+        LinearGradient(
+            colors: [
+                VintagePalette.backgroundTop,
+                Color(red: 0.11, green: 0.10, blue: 0.08),
+                VintagePalette.backgroundBottom
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+
+        RadialGradient(
+            colors: [
+                VintagePalette.accentSoft.opacity(0.18),
+                .clear
+            ],
+            center: .topLeading,
+            startRadius: 10,
+            endRadius: 380
+        )
+
+        RadialGradient(
+            colors: [
+                VintagePalette.wine.opacity(0.18),
+                .clear
+            ],
+            center: .bottomTrailing,
+            startRadius: 20,
+            endRadius: 420
+        )
+    }
+    .ignoresSafeArea()
 }
